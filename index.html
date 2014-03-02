@@ -31,8 +31,11 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <h3>
-<a name="o-ospf" class="anchor" href="#o-ospf"><span class="octicon octicon-link"></span></a>O OSPF</h3>
+        <h1>
+<a name="teoretick%C3%A1-%C4%8D%C3%A1st" class="anchor" href="#teoretick%C3%A1-%C4%8D%C3%A1st"><span class="octicon octicon-link"></span></a>Teoretická část</h1>
+
+<hr><h3>
+<a name="ospf" class="anchor" href="#ospf"><span class="octicon octicon-link"></span></a>OSPF</h3>
 
 <p>Název znamená Open Shortest Path First a jedná se protokol používaný pro interní routování uvnitř autonomního systému (AS). Autonomním systémem může být např. infrastruktura ISP - linky po republice nebo v menším měřítku například wifi síť v nějaké lokalitě.
 OSPF je tzv. link-state protokol, pomocí kterého si sousední routery prostřednictvím hello paketů vyměňují informace o stavu linek, a každý z routerů v dané oblasti (area) zná celou topologii sítě. Výchozí konfigurace je hello paket jednou za 10 sekund, a pokud nepřijde žádná odezva do 40 sekund, vyprší dead interval a linka je prohlášena za mrtvou. Poté následuje přepočet a router hledá cestu jinudy, nezapomene však informovat všechny své sousedy (neighbor). Proces OSPF zjištěné informace předá démonu zebra, který již kernelu řekne novou default routu a routy přijaté od sousedů.</p>
@@ -42,11 +45,12 @@ OSPF je tzv. link-state protokol, pomocí kterého si sousední routery prostře
 <ul>
 <li>směrovací protokol pro dynamické směrování v síti</li>
 <li>LS (Link-State) protokol</li>
-<li>směrovací tabulka se vytváří pomocí Dijkstrova algoritmu</li>
+<li>směrovací tabulka se vytváří pomocí <a href="http://cs.wikipedia.org/wiki/Dijkstr%C5%AFv_algoritmus">Dijkstrova algoritmu</a>
+</li>
 <li>Router objevuje sousední routery tím, že vysílá tzv. "Hello" zprávy (LSA pakety)</li>
 <li>AD = 110</li>
-</ul><h3>
-<a name="o-quagga" class="anchor" href="#o-quagga"><span class="octicon octicon-link"></span></a>O Quagga</h3>
+</ul><hr><h3>
+<a name="quagga" class="anchor" href="#quagga"><span class="octicon octicon-link"></span></a>Quagga</h3>
 
 <p>Je rourovací open-source software pro OSPF routing.
 Quagga je softwarový směrovač, nástupce dřívějšího projektu Zebra.
@@ -56,13 +60,36 @@ Program se skládá z několika démonů.
 Hlavní roli hraje démon zebra, který shromažďuje směrovací informace, spolupracuje s jádrem systému a upravuje jeho směrovací tabulky.
 Ostatní démoni (ripd, ripngd, ospfd, bgpd) slouží jako rozhraní centrálního démona pro konkrétní směrovací protokoly.
 Nevýhodou tohoto distribuovaného uspořádání je poněkud chaotická konfigurace - každý démon má vlastní konfigurační soubor a vlastní rozhraní pro interaktivní komunikaci.
-To znamená, že musíme nakonfigurovat jak Zebru, tak ospfd. Problém roztøíštìného ovládání øeší program vtysh (VTY shell), který øídí celou Quaggu.
-Spustit jej smí jen superuživatel root a mùže pak využívat příkazy všech démonů. vtysh může konfiguraci ukládat buď do jednoho společného konfiguračního souboru Quagga.conf, nebo do samostatných souborů pro jednotlivé démony (jejich jména jsou vždy demon.conf).
-Implicitiní a doporučovaný je režim se samostatnými konfiguračními soubory.
+To znamená, že musíme nakonfigurovat jak Zebru, tak ospfd. Problém roztříštěného ovládání řeší program vtysh (VTY shell), který řídí celou Quaggu.
+Spustit jej smí jen root a může pak využívat příkazy všech démonů. Vtysh může konfiguraci ukládat buď do jednoho společného konfiguračního souboru Quagga.conf, nebo do samostatných souborů pro jednotlivé démony (jejich jména jsou vždy démon.conf).
+Implicitní a doporučovaný je režim se samostatnými konfiguračními soubory.
 Quagga svým konfiguračním jazykem napodobuje směrovače Cisco Systems.</p>
 
-<h3>
-<a name="konfigurace-quagga-ospf" class="anchor" href="#konfigurace-quagga-ospf"><span class="octicon octicon-link"></span></a>Konfigurace Quagga OSPF</h3>
+<hr><h1>
+<a name="praktick%C3%A1-%C4%8D%C3%A1st" class="anchor" href="#praktick%C3%A1-%C4%8D%C3%A1st"><span class="octicon octicon-link"></span></a>Praktická část</h1>
+
+<hr><h3>
+<a name="%C5%98e%C5%A1en%C3%AD-obecn%C4%9B" class="anchor" href="#%C5%98e%C5%A1en%C3%AD-obecn%C4%9B"><span class="octicon octicon-link"></span></a>Řešení obecně</h3>
+
+<p>Schéma zapojení:</p>
+
+<p><img src="http://wonderfulengineering.com/wp-content/uploads/2013/12/hd-wallpaper-desktop-1.jpeg" alt="Palma voe"></p>
+
+<p><strong>Postup řešení:</strong></p>
+
+<ol>
+<li>Všem PC přiřadíme na rozhraních IP adresy dle schématu</li>
+<li>PC2 a PC3 nastavíme výchozí brány (PC2 ... 192.168.2.1; PC3 ... 192.168.1.1)</li>
+<li>PC1 bude sloužit jako router - zde stáhnout a nainstalovat Quaggu</li>
+</ol><p><strong>Test funkčnosti:</strong></p>
+
+<p>Protože PC2 s PC3 leží ve 2 různých sítích, které odděluje PC1 (quagga router), otestujeme funkčnost příkazem ping např. z PC2 &lt;-&gt; PC3</p>
+
+<pre><code>  PC2$ ping 192.168.1.2
+</code></pre>
+
+<hr><h3>
+<a name="pc1-konfigurace-quagga-ospf" class="anchor" href="#pc1-konfigurace-quagga-ospf"><span class="octicon octicon-link"></span></a>PC1: Konfigurace Quagga OSPF</h3>
 
 <ol>
 <li>
@@ -72,7 +99,7 @@ Quagga svým konfiguračním jazykem napodobuje směrovače Cisco Systems.</p>
 </code></pre>
 </li>
 <li>
-<p>Soubor <strong><em>/etc/quagga/daemons</em></strong> otevřeme v textovém editoru (např. nano) a povolíme daemony, které chceme používat přiřazením hodnoty yes k daemonu. V našem případě <em>zebra</em> a <em>ospfd</em>.</p>
+<p>Soubor <strong><em>/etc/quagga/daemons</em></strong> otevřeme v textovém editoru (např. nano) a povolíme daemony, které chceme používat přiřazením hodnoty yes. V našem případě <em>zebra</em> a <em>ospfd</em>.</p>
 
 <pre><code>$ nano /etc/quagga/daemons
 </code></pre>
@@ -121,17 +148,17 @@ $ chmod 640 /etc/quagga/*.conf
 <pre><code>$ telnet localhost 2601
 </code></pre>
 
-<div class="highlight highlight-java"><pre><span class="nl">Password:</span> <span class="n">zebra</span>
-<span class="n">Router</span><span class="o">&gt;</span> <span class="n">enable</span>
-<span class="n">Router</span><span class="err">#</span> <span class="n">conf</span> <span class="n">t</span>
-<span class="n">Router</span><span class="o">(</span><span class="n">config</span><span class="o">)</span><span class="err">#</span> <span class="kt">int</span> <span class="n">eth1</span>
-<span class="n">Router</span><span class="o">(</span><span class="n">config</span><span class="o">-</span><span class="k">if</span><span class="o">)</span><span class="err">#</span> <span class="n">ip</span> <span class="n">address</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">2.4</span><span class="o">/</span><span class="mi">24</span>
-<span class="n">Router</span><span class="o">(</span><span class="n">config</span><span class="o">)</span><span class="err">#</span> <span class="n">exit</span>
-<span class="n">Router</span><span class="o">(</span><span class="n">config</span><span class="o">-</span><span class="k">if</span><span class="o">)</span><span class="err">#</span> <span class="kt">int</span> <span class="n">eth2</span>
-<span class="n">Router</span><span class="o">(</span><span class="n">config</span><span class="o">-</span><span class="k">if</span><span class="o">)</span><span class="err">#</span> <span class="n">ip</span> <span class="n">address</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">1.2</span><span class="o">/</span><span class="mi">24</span>
-<span class="n">Router</span><span class="o">(</span><span class="n">config</span><span class="o">-</span><span class="k">if</span><span class="o">)</span><span class="err">#</span> <span class="n">exit</span>
-<span class="n">Router</span><span class="o">(</span><span class="n">config</span><span class="o">)</span><span class="err">#</span> <span class="n">ip</span> <span class="n">forwarding</span>
-</pre></div>
+<pre><code>Password: zebra
+Router&gt; enable
+Router# conf t
+Router(config)# int eth1
+Router(config-if)# ip address 192.168.2.4/24
+Router(config)# exit
+Router(config-if)# int eth2
+Router(config-if)# ip address 192.168.1.2/24
+Router(config-if)# exit
+Router(config)# ip forwarding
+</code></pre>
 </li>
 <li>
 <p>Spustíme nastavení OSPF. Výchozí heslo: zebra</p>
@@ -147,27 +174,35 @@ ospfd(config-router)# network 192.168.2.0/24 area 0
 ospfd(config-router)# network 192.168.1.0/24 area 0
 </code></pre>
 </li>
-</ol><p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+</ol><hr><h3>
+<a name="help" class="anchor" href="#help"><span class="octicon octicon-link"></span></a>Help:</h3>
+
+<p>Zjištění stavu linky rozhraní:</p>
+
+<pre><code>$ mii-tool
+</code></pre>
+
+<p>Nastavení výchozí brány:</p>
+
+<pre><code>$ route add default gw &lt;IP_vychozi_brany&gt;
+</code></pre>
+
+<p>Mám nainstalovaný balíček quagga?</p>
+
+<pre><code>$ dpkg -l | grep quagga
+</code></pre>
+
+<p>Běží mi daemon ospfd?</p>
+
+<pre><code>$ ps -ef | grep ospf
+</code></pre>
 
 <h3>
-<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Designer Templates</h3>
+<a name="zdroje" class="anchor" href="#zdroje"><span class="octicon octicon-link"></span></a>Zdroje:</h3>
 
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
+<p><a href="http://openmaniak.com/quagga.php">http://openmaniak.com/quagga.php</a></p>
 
-<h3>
-<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
-
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
-
-<h3>
-<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
-
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
-
-<h3>
-<a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
-
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
+<p><a href="http://www.abclinuxu.cz/serialy/ospf-dynamicke-routovani">http://www.abclinuxu.cz/serialy/ospf-dynamicke-routovani</a></p>
       </section>
     </div>
 
