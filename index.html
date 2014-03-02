@@ -35,68 +35,89 @@
 <a name="konfigurace-quagga-ospf" class="anchor" href="#konfigurace-quagga-ospf"><span class="octicon octicon-link"></span></a>Konfigurace Quagga OSPF.</h3>
 
 <ol>
-<li>Stáhneme a nainstalujeme balíček quagga.</li>
-</ol><pre><code>$ apt-get install quagga
-</code></pre>
+<li>
+<p>Stáhneme a nainstalujeme balíček quagga.</p>
 
-<hr><p>Soubor <strong><em>/etc/quagga/daemons</em></strong> otevřeme v textovém editoru (např. nano) a povolíme daemony, které chceme používat přiřazením hodnoty yes k daemonu. V našem případě <em>zebra</em> a <em>ospfd</em>.</p>
+<pre><code>$ apt-get install quagga
+</code></pre>
+</li>
+<li>
+<p>Soubor <strong><em>/etc/quagga/daemons</em></strong> otevřeme v textovém editoru (např. nano) a povolíme daemony, které chceme používat přiřazením hodnoty yes k daemonu. V našem případě <em>zebra</em> a <em>ospfd</em>.</p>
 
 <pre><code>$ nano /etc/quagga/daemons
-...
-zebra=yes
+</code></pre>
+
+<pre><code>zebra=yes
 bgpd=no
 ospfd=yes
 ospf6d=no
 </code></pre>
-
-<hr><p>Restartujeme quaggu</p>
+</li>
+<li>
+<p>Restartujeme quaggu</p>
 
 <pre><code>$ /etc/init.d/quagga restart
 </code></pre>
-
-<hr><p>Vytvoříme soubory zebra.conf a ospfd.conf zkopírováním ukázkových souborů z lokace <em><strong>/usr/share/doc/quagga/examples/</strong></em></p>
+</li>
+<li>
+<p>Vytvoříme soubory zebra.conf a ospfd.conf zkopírováním ukázkových souborů z lokace <em><strong>/usr/share/doc/quagga/examples/</strong></em></p>
 
 <pre><code>$ cp /usr/share/doc/quagga/examples/zebra.conf.sample /etc/quagga/zebra.conf
 $ cp /usr/share/doc/quagga/examples/ospfd.conf.sample /etc/quagga/ospfd.conf
 </code></pre>
-
-<hr><p>Změníme vlastníka a práva u všech souborů s koncovkou .conf</p>
+</li>
+<li>
+<p>Změníme vlastníka a práva u všech souborů s koncovkou .conf</p>
 
 <pre><code>$ chown quagga.quaggavty /etc/quagga/*.conf
 $ chmod 640 /etc/quagga/*.conf
 </code></pre>
-
-<hr><p>Restartujeme quaggu</p>
+</li>
+<li>
+<p>Restartujeme quaggu</p>
 
 <pre><code>$ /etc/init.d/quagga restart
 </code></pre>
+</li>
+<li>
+<p>Zjištění otevřených portů na našem PC.</p>
 
-<hr><p>Zjistíme povolené porty</p>
-
-<pre><code>$ nmap localhost &gt; 
+<pre><code>$ nmap localhost
 </code></pre>
-
-<hr><p>Spustíme nastavení zebry (pokud port pro zebru je 2601). Výchozí heslo je zebra pro</p>
+</li>
+<li>
+<p>Spustíme nastavení Zebry. Výchozí heslo: zebra</p>
 
 <pre><code>$ telnet localhost 2601
 </code></pre>
 
-<hr><pre><code>zebra
-enable
-zebra
-conf t
-int eth1
-ip address 192.168.2.4/24
-exit
-int eth2
-ip address 192.168.1.2/24
-exit
-ip forwarding
-end
-exit
+<pre><code>Password: zebra
+Router&gt; enable
+Router# conf t
+Router(config)# int eth1
+Router(config-if)# ip address 192.168.2.4/24
+Router(config)# exit
+Router(config-if)# int eth2
+Router(config-if)# ip address 192.168.1.2/24
+Router(config-if)# exit
+Router(config)# ip forwarding
+</code></pre>
+</li>
+<li>
+<p>Spustíme nastavení OSPF. Výchozí heslo: zebra</p>
+
+<pre><code>$ telnet localhost 2604
 </code></pre>
 
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+<pre><code>Password: zebra
+ospfd&gt; enable
+ospfd# conf t
+ospfd(config)# router ospf
+ospfd(config-router)# network 192.168.2.0/24 area 0
+ospfd(config-router)# network 192.168.1.0/24 area 0
+</code></pre>
+</li>
+</ol><p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
 
 <h3>
 <a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Designer Templates</h3>
