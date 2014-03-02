@@ -32,7 +32,37 @@
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
         <h3>
-<a name="konfigurace-quagga-ospf" class="anchor" href="#konfigurace-quagga-ospf"><span class="octicon octicon-link"></span></a>Konfigurace Quagga OSPF.</h3>
+<a name="o-ospf" class="anchor" href="#o-ospf"><span class="octicon octicon-link"></span></a>O OSPF</h3>
+
+<p>Název znamená Open Shortest Path First a jedná se protokol používaný pro interní routování uvnitř autonomního systému (AS). Autonomním systémem může být např. infrastruktura ISP - linky po republice nebo v menším měřítku například wifi síť v nějaké lokalitě.
+OSPF je tzv. link-state protokol, pomocí kterého si sousední routery prostřednictvím hello paketů vyměňují informace o stavu linek, a každý z routerů v dané oblasti (area) zná celou topologii sítě. Výchozí konfigurace je hello paket jednou za 10 sekund, a pokud nepřijde žádná odezva do 40 sekund, vyprší dead interval a linka je prohlášena za mrtvou. Poté následuje přepočet a router hledá cestu jinudy, nezapomene však informovat všechny své sousedy (neighbor). Proces OSPF zjištěné informace předá démonu zebra, který již kernelu řekne novou default routu a routy přijaté od sousedů.</p>
+
+<p>OSPF ve zkratce:</p>
+
+<ul>
+<li>směrovací protokol pro dynamické směrování v síti</li>
+<li>LS (Link-State) protokol</li>
+<li>směrovací tabulka se vytváří pomocí Dijkstrova algoritmu</li>
+<li>Router objevuje sousední routery tím, že vysílá tzv. "Hello" zprávy (LSA pakety)</li>
+<li>AD = 110</li>
+</ul><h3>
+<a name="o-quagga" class="anchor" href="#o-quagga"><span class="octicon octicon-link"></span></a>O Quagga</h3>
+
+<p>Je rourovací open-source software pro OSPF routing.
+Quagga je softwarový směrovač, nástupce dřívějšího projektu Zebra.
+Je vydán pod otevřenou licencí GPL a distribuován v podobě zdrojových kódů a binárních balíčků pro vybrané systémy unixového typu.
+Podporuje IPv4 i IPv6 a podporuje protokoly RIP, OSPF a BGP.
+Program se skládá z několika démonů.
+Hlavní roli hraje démon zebra, který shromažďuje směrovací informace, spolupracuje s jádrem systému a upravuje jeho směrovací tabulky.
+Ostatní démoni (ripd, ripngd, ospfd, bgpd) slouží jako rozhraní centrálního démona pro konkrétní směrovací protokoly.
+Nevýhodou tohoto distribuovaného uspořádání je poněkud chaotická konfigurace - každý démon má vlastní konfigurační soubor a vlastní rozhraní pro interaktivní komunikaci.
+To znamená, že musíme nakonfigurovat jak Zebru, tak ospfd. Problém roztøíštìného ovládání øeší program vtysh (VTY shell), který øídí celou Quaggu.
+Spustit jej smí jen superuživatel root a mùže pak využívat příkazy všech démonů. vtysh může konfiguraci ukládat buď do jednoho společného konfiguračního souboru Quagga.conf, nebo do samostatných souborů pro jednotlivé démony (jejich jména jsou vždy demon.conf).
+Implicitiní a doporučovaný je režim se samostatnými konfiguračními soubory.
+Quagga svým konfiguračním jazykem napodobuje směrovače Cisco Systems.</p>
+
+<h3>
+<a name="konfigurace-quagga-ospf" class="anchor" href="#konfigurace-quagga-ospf"><span class="octicon octicon-link"></span></a>Konfigurace Quagga OSPF</h3>
 
 <ol>
 <li>
@@ -91,17 +121,17 @@ $ chmod 640 /etc/quagga/*.conf
 <pre><code>$ telnet localhost 2601
 </code></pre>
 
-<pre><code>Password: zebra
-Router&gt; enable
-Router# conf t
-Router(config)# int eth1
-Router(config-if)# ip address 192.168.2.4/24
-Router(config)# exit
-Router(config-if)# int eth2
-Router(config-if)# ip address 192.168.1.2/24
-Router(config-if)# exit
-Router(config)# ip forwarding
-</code></pre>
+<div class="highlight highlight-java"><pre><span class="nl">Password:</span> <span class="n">zebra</span>
+<span class="n">Router</span><span class="o">&gt;</span> <span class="n">enable</span>
+<span class="n">Router</span><span class="err">#</span> <span class="n">conf</span> <span class="n">t</span>
+<span class="n">Router</span><span class="o">(</span><span class="n">config</span><span class="o">)</span><span class="err">#</span> <span class="kt">int</span> <span class="n">eth1</span>
+<span class="n">Router</span><span class="o">(</span><span class="n">config</span><span class="o">-</span><span class="k">if</span><span class="o">)</span><span class="err">#</span> <span class="n">ip</span> <span class="n">address</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">2.4</span><span class="o">/</span><span class="mi">24</span>
+<span class="n">Router</span><span class="o">(</span><span class="n">config</span><span class="o">)</span><span class="err">#</span> <span class="n">exit</span>
+<span class="n">Router</span><span class="o">(</span><span class="n">config</span><span class="o">-</span><span class="k">if</span><span class="o">)</span><span class="err">#</span> <span class="kt">int</span> <span class="n">eth2</span>
+<span class="n">Router</span><span class="o">(</span><span class="n">config</span><span class="o">-</span><span class="k">if</span><span class="o">)</span><span class="err">#</span> <span class="n">ip</span> <span class="n">address</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">1.2</span><span class="o">/</span><span class="mi">24</span>
+<span class="n">Router</span><span class="o">(</span><span class="n">config</span><span class="o">-</span><span class="k">if</span><span class="o">)</span><span class="err">#</span> <span class="n">exit</span>
+<span class="n">Router</span><span class="o">(</span><span class="n">config</span><span class="o">)</span><span class="err">#</span> <span class="n">ip</span> <span class="n">forwarding</span>
+</pre></div>
 </li>
 <li>
 <p>Spustíme nastavení OSPF. Výchozí heslo: zebra</p>
